@@ -1,2 +1,3 @@
 page_turner.egg-info/
 condaenv.*.requirements.txt
+poetry.lock
