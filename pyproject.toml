@@ -6,11 +6,24 @@ authors = ["sytallax <sytallax@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-cython = "^3.0.10"
-matplotlib = "^3.8.4"
+python = "=3.9.19"
 numpy = "^1.26.4"
-
+pyqt5-qt5 = "5.15.2"
+cython = "^3.0.10"
+cyolo-score-following = { git = "https://github.com/CPJKU/cyolo_score_following" }
+madmom = { git = "https://github.com/CPJKU/madmom" }
+pyserial = "^3.5"
+torch = "^2.3.0"
+matplotlib = "^3.8.4"
+pyqtgraph = "^0.13.6"
+torchvision = "^0.18.0"
+torchaudio = "^2.3.0"
+tqdm = "^4.66.2"
+pyaudio = "^0.2.14"
+pysoundfile = "^0.9.0.post1"
+pyyaml = "^6.0.1"
+tensorboard = "^2.16.2"
+librosa = "^0.10.1"
 
 [build-system]
 requires = ["poetry-core"]
