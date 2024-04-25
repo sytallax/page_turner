@@ -8,7 +8,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "=3.9.19"
 numpy = "^1.26.4"
-pyqt5-qt5 = "5.15.2"
 cython = "^3.0.10"
 cyolo-score-following = { git = "https://github.com/CPJKU/cyolo_score_following" }
 madmom = { git = "https://github.com/CPJKU/madmom" }
@@ -32,6 +31,8 @@ setuptools = "^69.5.1"
 types-setuptools = "^69.5.0.20240423"
 types-pyserial = "^3.5.0.20240311"
 ruff = "^0.4.1"
+pyqt5 = "^5.15.10"
+opencv-python = "^4.9.0.80"
 
 [build-system]
 requires = ["poetry-core"]
