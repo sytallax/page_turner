@@ -24,6 +24,14 @@ pysoundfile = "^0.9.0.post1"
 pyyaml = "^6.0.1"
 tensorboard = "^2.16.2"
 librosa = "^0.10.1"
+mypy = "^1.10.0"
+types-pyaudio = "^0.2.16.20240425"
+pyqt5-stubs = "^5.15.6.0"
+opencv-stubs = "^0.0.8"
+setuptools = "^69.5.1"
+types-setuptools = "^69.5.0.20240423"
+types-pyserial = "^3.5.0.20240311"
+ruff = "^0.4.1"
 
 [build-system]
 requires = ["poetry-core"]
