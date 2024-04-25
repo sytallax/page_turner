@@ -5,7 +5,13 @@ import numpy as np
 
 def find_system_ys(org_img, thicken_lines=False):
     img = np.asarray(cv2.cvtColor(org_img * 255, cv2.COLOR_BGR2GRAY), dtype=np.uint8)
-    img = 1 - cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 5)/255
+    img = (
+        1
+        - cv2.adaptiveThreshold(
+            img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 5
+        )
+        / 255
+    )
 
     if thicken_lines:
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
@@ -40,20 +46,19 @@ def find_system_ys(org_img, thicken_lines=False):
             j += 1
 
         e = int(sys_end[j])
-        local_peaks = np.argwhere(pxl[s:e + 1] == 1).flatten()
+        local_peaks = np.argwhere(pxl[s : e + 1] == 1).flatten()
         n_peaks = len(local_peaks)
 
         # staff has to contain at least 3 peaks and needs to be at least 15 pixel high
         if n_peaks < 3 or local_peaks[-1] - local_peaks[0] < 15:
-
-            staff_indicator[s:e + 1] = 0
-            pxl[s:e + 1] = 0
+            staff_indicator[s : e + 1] = 0
+            pxl[s : e + 1] = 0
         else:
-            pxl[s:e + 1][:local_peaks[0]] = 0
-            staff_indicator[s:e + 1][:local_peaks[0]] = 0
+            pxl[s : e + 1][: local_peaks[0]] = 0
+            staff_indicator[s : e + 1][: local_peaks[0]] = 0
 
-            pxl[s:e + 1][local_peaks[-1] + 1:] = 0
-            staff_indicator[s:e + 1][local_peaks[-1] + 1:] = 0
+            pxl[s : e + 1][local_peaks[-1] + 1 :] = 0
+            staff_indicator[s : e + 1][local_peaks[-1] + 1 :] = 0
 
             staffs.append((s + local_peaks[0], s + local_peaks[-1]))
 

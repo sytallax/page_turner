@@ -9,7 +9,6 @@ from multiprocessing import Pipe
 
 
 class ImageStream(object):
-
     def __init__(self, score_path=None, n_pages=None):
         self.score_path = score_path
 
@@ -26,7 +25,14 @@ class ImageStream(object):
             self.get_camera_input(wait_for_input=True)
 
         else:
-            self.org_scores, self.score, self.system_ys, self.pad, self.scale_factor, self.n_pages = self.load_score()
+            (
+                self.org_scores,
+                self.score,
+                self.system_ys,
+                self.pad,
+                self.scale_factor,
+                self.n_pages,
+            ) = self.load_score()
 
     @property
     def camera_input(self):
@@ -63,28 +69,33 @@ class ImageStream(object):
         # Add padding
         padded_scores = np.pad(org_scores, pad, mode="constant", constant_values=255)
 
-        scores = 1 - np.array(padded_scores, dtype=np.float32) / 255.
+        scores = 1 - np.array(padded_scores, dtype=np.float32) / 255.0
 
         # scale scores
         scaled_score = []
         scale_factor = scores[0].shape[0] / SCALE_WIDTH
 
         for score in scores:
-            scaled_score.append(cv2.resize(score, (SCALE_WIDTH, SCALE_WIDTH), interpolation=cv2.INTER_AREA))
+            scaled_score.append(
+                cv2.resize(
+                    score, (SCALE_WIDTH, SCALE_WIDTH), interpolation=cv2.INTER_AREA
+                )
+            )
 
         score = np.stack(scaled_score)
 
         org_scores_rgb = []
         system_ys = []
         for org_score in org_scores:
-            org_score = cv2.cvtColor(np.array(org_score, dtype=np.float32) / 255., cv2.COLOR_GRAY2BGR)
+            org_score = cv2.cvtColor(
+                np.array(org_score, dtype=np.float32) / 255.0, cv2.COLOR_GRAY2BGR
+            )
             system_ys.append(find_system_ys(org_score))
             org_scores_rgb.append(org_score)
 
         return org_scores_rgb, score, system_ys, pad1, scale_factor, n_pages
 
     def get(self, page):
-
         if self.camera_input:
             page = 0
             self.get_camera_input()
@@ -92,9 +103,6 @@ class ImageStream(object):
         return self.org_scores[page], self.score[page], self.system_ys[page]
 
     def close(self):
-
         if self.camera_input:
             self.camera.terminate()
             self.camera.join()
-
-

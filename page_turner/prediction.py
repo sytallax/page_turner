@@ -8,10 +8,17 @@ import matplotlib.cm as cm
 import numpy as np
 
 from collections import deque
-from cyolo_score_following.models.yolo import load_pretrained_model
-from cyolo_score_following.utils.data_utils import SAMPLE_RATE, FPS, FRAME_SIZE, HOP_SIZE
-from cyolo_score_following.utils.general import xywh2xyxy
-from cyolo_score_following.utils.video_utils import plot_box, create_video
+from cyolo_score_following.models.yolo import load_pretrained_model  # type: ignore
+
+from cyolo_score_following.utils.data_utils import (  # type: ignore
+    SAMPLE_RATE,
+    FPS,
+    FRAME_SIZE,
+    HOP_SIZE,
+)
+from cyolo_score_following.utils.general import xywh2xyxy  # type: ignore
+
+from cyolo_score_following.utils.video_utils import plot_box, create_video  # type: ignore
 
 from page_turner.audio_stream import AudioStream
 from page_turner.config import *
@@ -19,8 +26,14 @@ from page_turner.image_stream import ImageStream
 
 
 class ScoreAudioPrediction(threading.Thread):
-
-    def __init__(self, param_path,  audio_path=None, score_path=None, n_pages=None, score_fraction=0.5):
+    def __init__(
+        self,
+        param_path,
+        audio_path=None,
+        score_path=None,
+        n_pages=None,
+        score_fraction=0.5,
+    ):
         """
         This function initializes an instance of the class.
         :param param_path: full path to the model loaded
@@ -40,7 +53,7 @@ class ScoreAudioPrediction(threading.Thread):
         self.audio_stream = AudioStream(self.audio_path)
         self.image_stream = ImageStream(self.score_path, n_pages)
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.network, criterion = load_pretrained_model(param_path)
 
         print(f"Putting model to {self.device} ...")
@@ -57,7 +70,6 @@ class ScoreAudioPrediction(threading.Thread):
         return self.score_img, self.spec_img
 
     def get_best_prediction(self, predictions, systems, start_from_top=False):
-
         _, idx = torch.sort(predictions[:, 4], descending=True)
         sorted_predictions = predictions[idx]
 
@@ -72,9 +84,8 @@ class ScoreAudioPrediction(threading.Thread):
         x1, y1, x2, y2 = xywh2xyxy(sorted_predictions[:, :4]).cpu().numpy().T
 
         try:
-
             in_first_system = (y >= systems[0][0]) & (y <= systems[0][1])
-            start_in_front = (x < SCORE_WIDTH*0.3)
+            start_in_front = x < SCORE_WIDTH * 0.3
 
             if start_from_top:
                 indices = in_first_system & start_in_front & start_from_top
@@ -86,11 +97,14 @@ class ScoreAudioPrediction(threading.Thread):
                     y2 = y2[indices]
                     best = [x1[0], y1[0], x2[0], y2[0]]
             else:
+                previous_y = (
+                    self.previous_prediction[1]
+                    + (self.previous_prediction[3] - self.previous_prediction[1]) / 2
+                )
 
-                previous_y = self.previous_prediction[1] \
-                                  + (self.previous_prediction[3] - self.previous_prediction[1])/2
-
-                curr_system_idx = np.argwhere((systems[:, 0] <= previous_y) & (systems[:, 1] >= previous_y)).item()
+                curr_system_idx = np.argwhere(
+                    (systems[:, 0] <= previous_y) & (systems[:, 1] >= previous_y)
+                ).item()
 
                 prev_system_idx = max(0, curr_system_idx - 1)
                 next_system_idx = min(curr_system_idx + 1, len(systems) - 1)
@@ -100,7 +114,9 @@ class ScoreAudioPrediction(threading.Thread):
                 next_system = systems[next_system_idx]
 
                 stay_within_system = (y >= curr_system[0]) & (y <= curr_system[1])
-                move_to_prev_system = (y >= prev_system[0]) & (y <= prev_system[1]) & (confidence > 0.5)
+                move_to_prev_system = (
+                    (y >= prev_system[0]) & (y <= prev_system[1]) & (confidence > 0.5)
+                )
                 move_to_next_system = (y >= next_system[0]) & (y <= next_system[1])
 
                 indices = stay_within_system | move_to_next_system | move_to_prev_system
@@ -140,7 +156,6 @@ class ScoreAudioPrediction(threading.Thread):
         page_turner_cooldown = 0
         start_from_top = True
         while not self.is_piece_end:
-
             frame = self.audio_stream.get()
 
             if frame is None:
@@ -151,13 +166,18 @@ class ScoreAudioPrediction(threading.Thread):
             if len(signal[from_:to_]) != FRAME_SIZE:
                 continue
 
-            in_last_system = len(system_ys) > 0 and system_ys[-1][0] <= np.mean(curr_y) <= system_ys[-1][1]
+            in_last_system = (
+                len(system_ys) > 0
+                and system_ys[-1][0] <= np.mean(curr_y) <= system_ys[-1][1]
+            )
 
             # if the current position in the last system reaches a certain threshold
             if in_last_system and np.mean(curr_x) > self.score_fraction * SCORE_WIDTH:
-
-                if self.image_stream.more_pages(self.actual_page) and page_turner_cooldown <= 0:
-                    print('Turn page')
+                if (
+                    self.image_stream.more_pages(self.actual_page)
+                    and page_turner_cooldown <= 0
+                ):
+                    print("Turn page")
                     hidden = None
                     self.actual_page += 1
                     self.previous_prediction = None
@@ -169,11 +189,13 @@ class ScoreAudioPrediction(threading.Thread):
 
                     if self.image_stream.camera_input:
                         try:
-                            with serial.Serial('/dev/ttyUSB0', 9600, timeout=1) as ser:
+                            with serial.Serial("/dev/ttyUSB0", 9600, timeout=1) as ser:
                                 ser.write(serial.to_bytes([0xA0, 0x01, 0x01, 0xA2]))
                                 ser.write(serial.to_bytes([0xA0, 0x01, 0x00, 0xA1]))
                         except:
-                            print("Physical page turning not possible. Did you run sudo chown <user> /dev/ttyUSB0 ?")
+                            print(
+                                "Physical page turning not possible. Did you run sudo chown <user> /dev/ttyUSB0 ?"
+                            )
 
             org_score, score, system_ys = self.image_stream.get(self.actual_page)
 
@@ -185,17 +207,27 @@ class ScoreAudioPrediction(threading.Thread):
 
             with torch.no_grad():
                 # add channel and batch dimension
-                score_tensor = torch.from_numpy(score).unsqueeze(0).unsqueeze(0).to(self.device)
+                score_tensor = (
+                    torch.from_numpy(score).unsqueeze(0).unsqueeze(0).to(self.device)
+                )
 
-                sig_excerpt = torch.from_numpy(signal[from_:to_]).float().to(self.device)
-                spec_frame = self.network.compute_spec([sig_excerpt], tempo_aug=False)[0]
+                sig_excerpt = (
+                    torch.from_numpy(signal[from_:to_]).float().to(self.device)
+                )
+                spec_frame = self.network.compute_spec([sig_excerpt], tempo_aug=False)[
+                    0
+                ]
 
-                z, hidden = self.network.conditioning_network.get_conditioning(spec_frame, hidden=hidden)
+                z, hidden = self.network.conditioning_network.get_conditioning(
+                    spec_frame, hidden=hidden
+                )
                 inference_out, pred = self.network.predict(score_tensor, z)
 
             filtered_inference_out = inference_out[0, inference_out[0, :, -1] == 0]
 
-            best_prediction = self.get_best_prediction(filtered_inference_out, system_ys, start_from_top=start_from_top)
+            best_prediction = self.get_best_prediction(
+                filtered_inference_out, system_ys, start_from_top=start_from_top
+            )
 
             if best_prediction is not None:
                 x1, y1, x2, y2 = best_prediction
@@ -207,7 +239,9 @@ class ScoreAudioPrediction(threading.Thread):
 
             self.previous_prediction = best_prediction
 
-            self.score_img, self.spec_img = self.prepare_visualization(org_score, spec_frame, best_prediction)
+            self.score_img, self.spec_img = self.prepare_visualization(
+                org_score, spec_frame, best_prediction
+            )
 
             observations.append(self.score_img)
 
@@ -223,7 +257,6 @@ class ScoreAudioPrediction(threading.Thread):
         self.is_piece_end = True
 
     def prepare_visualization(self, score, spec_frame, prediction):
-
         if self.vis_spec is not None:
             self.vis_spec = np.roll(self.vis_spec, -1, axis=1)
         else:
@@ -235,13 +268,23 @@ class ScoreAudioPrediction(threading.Thread):
 
         if prediction is not None:
             x1, y1, x2, y2 = prediction
-            plot_box([x1, y1, x2, y2], img_pred, label="Pred", color=(1, 0, 0), line_thickness=2)
+            plot_box(
+                [x1, y1, x2, y2],
+                img_pred,
+                label="Pred",
+                color=(1, 0, 0),
+                line_thickness=2,
+            )
 
         score_img = np.array((img_pred * 255), dtype=np.uint8)
 
-        spec_excerpt = cv2.resize(np.flipud(self.vis_spec),
-                                  (round(self.vis_spec.shape[1] * self.image_stream.scale_factor),
-                                   round(self.vis_spec.shape[0] * self.image_stream.scale_factor)))
+        spec_excerpt = cv2.resize(
+            np.flipud(self.vis_spec),
+            (
+                round(self.vis_spec.shape[1] * self.image_stream.scale_factor),
+                round(self.vis_spec.shape[0] * self.image_stream.scale_factor),
+            ),
+        )
         spec_excerpt = cm.viridis(spec_excerpt)[:, :, :3]
         spec_img = np.array((spec_excerpt * 255), dtype=np.uint8)
 
@@ -251,7 +294,7 @@ class ScoreAudioPrediction(threading.Thread):
         self.is_piece_end = True
 
     def write_video(self, observations, audio):
-        print('Storing Video...')
+        print("Storing Video...")
         observations = [cv2.cvtColor(o, cv2.COLOR_RGB2BGR) for o in observations]
 
         if self.audio_path is None:
@@ -262,5 +305,7 @@ class ScoreAudioPrediction(threading.Thread):
         if self.score_path is None:
             fname += "_camera"
 
-        create_video(observations, audio, fname, FPS, SAMPLE_RATE, tag="", path="../videos")
-        print('Done!')
+        create_video(
+            observations, audio, fname, FPS, SAMPLE_RATE, tag="", path="../videos"
+        )
+        print("Done!")

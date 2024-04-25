@@ -1,22 +1,25 @@
-
-import pyqtgraph as pg
+import pyqtgraph as pg  # type: ignore
 
 from page_turner.dialog import DialogWindow
 from page_turner.prediction import ScoreAudioPrediction
 from PyQt5 import QtWidgets
-from pyqtgraph.Qt import QtCore
+from pyqtgraph.Qt import QtCore  # type: ignore
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
-
         super().__init__()
         self.setWindowTitle("Automatic Page Turner")
 
         height = self.screen().size().height()
         self.resize(self.screen().size().width(), height)
 
-        self.param_path, self.audio_path, self.score_path, self.n_pages = None, None, None, None
+        self.param_path, self.audio_path, self.score_path, self.n_pages = (
+            None,
+            None,
+            None,
+            None,
+        )
         self.score_fraction = 0.5
 
         vert_layout = QtWidgets.QVBoxLayout()
@@ -34,7 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Scores_graphics.setCentralItem(scores_view)
         scores_view.setAspectLocked(True)
 
-        self.score_img = pg.ImageItem(border="l", levels=(0, 255), axisOrder='row-major')
+        self.score_img = pg.ImageItem(
+            border="l", levels=(0, 255), axisOrder="row-major"
+        )
         scores_view.addItem(self.score_img)
 
         # initializes the audio image
@@ -49,7 +54,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.audio_graphics.setCentralItem(audio_view)
         audio_view.setAspectLocked(True)
 
-        self.audio_img = pg.ImageItem(border="l", levels=(0, 255), axisOrder='row-major')
+        self.audio_img = pg.ImageItem(
+            border="l", levels=(0, 255), axisOrder="row-major"
+        )
         audio_view.addItem(self.audio_img)
 
         vert_layout.addWidget(self.Scores_graphics)
@@ -89,14 +96,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.dialog.exec()
 
-        self.param_path = self.dialog.model_path  # path leading to the chosen model loaded from a .pt file
-        self.audio_path = self.dialog.audio_path  # None (if live) or the path to the .wav file of the audio
-        self.score_path = self.dialog.score_path  # None (if live) or the path to the .npz file of the score
+        self.param_path = (
+            self.dialog.model_path
+        )  # path leading to the chosen model loaded from a .pt file
+        self.audio_path = (
+            self.dialog.audio_path
+        )  # None (if live) or the path to the .wav file of the audio
+        self.score_path = (
+            self.dialog.score_path
+        )  # None (if live) or the path to the .npz file of the score
         self.n_pages = self.dialog.n_pages
         self.score_fraction = self.dialog.score_fraction
 
-        self.image_predictor = ScoreAudioPrediction(self.param_path, audio_path=self.audio_path,
-                                                    score_path=self.score_path, n_pages=self.n_pages, score_fraction=self.score_fraction)
+        self.image_predictor = ScoreAudioPrediction(
+            self.param_path,
+            audio_path=self.audio_path,
+            score_path=self.score_path,
+            n_pages=self.n_pages,
+            score_fraction=self.score_fraction,
+        )
 
         self.image_predictor.start()
 

@@ -141,7 +141,7 @@ class DialogWindow(QDialog):
         """
 
         if text == "choose local":
-            self.choose_piece_dir("pt", os.path.join('..', 'models'))
+            self.choose_piece_dir("pt", os.path.join("..", "models"))
         elif text == "default":
             self.model_path = DEFAULT_MODEL
         else:
@@ -160,9 +160,13 @@ class DialogWindow(QDialog):
             search_path = path
         else:
             search_path = DEFAULT_DIR
-        curr_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Select one piece', search_path,
-                                                             f"(*.{extension})",
-                                                             options=QFileDialog.DontUseNativeDialog)
+        curr_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Select one piece",
+            search_path,
+            f"(*.{extension})",
+            options=QFileDialog.DontUseNativeDialog,
+        )
 
         self.set_path(curr_path, extension)
 
