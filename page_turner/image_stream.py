@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from page_turner.camera import Camera
-from page_turner.config import *
+from page_turner.config import PADDING, SCALE_FACTOR, SCALE_WIDTH
 from page_turner.utils import find_system_ys
 from multiprocessing import Pipe
 

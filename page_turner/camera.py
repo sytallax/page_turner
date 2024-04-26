@@ -4,7 +4,7 @@ import subprocess
 
 import numpy as np
 
-from page_turner.config import *
+from page_turner.config import SCORE_HEIGHT, SCORE_WIDTH, PADDING
 from page_turner.utils import find_system_ys
 
 

@@ -21,7 +21,7 @@ from cyolo_score_following.utils.general import xywh2xyxy  # type: ignore
 from cyolo_score_following.utils.video_utils import plot_box, create_video  # type: ignore
 
 from page_turner.audio_stream import AudioStream
-from page_turner.config import *
+from page_turner.config import SCORE_WIDTH, SPEC_VIS_WINDOW
 from page_turner.image_stream import ImageStream
 
 
