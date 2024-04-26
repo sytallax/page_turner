@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "page-turner"
+version = "0.1.0"
+description = ""
+authors = ["sytallax <sytallax@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "=3.9.19"
+numpy = "^1.26.4"
+cython = "^3.0.10"
+cyolo-score-following = { git = "https://github.com/CPJKU/cyolo_score_following" }
+madmom = { git = "https://github.com/CPJKU/madmom" }
+pyserial = "^3.5"
+torch = "^2.3.0"
+matplotlib = "^3.8.4"
+pyqtgraph = "^0.13.6"
+torchvision = "^0.18.0"
+torchaudio = "^2.3.0"
+tqdm = "^4.66.2"
+pyaudio = "^0.2.14"
+pysoundfile = "^0.9.0.post1"
+pyyaml = "^6.0.1"
+tensorboard = "^2.16.2"
+librosa = "^0.10.1"
+mypy = "^1.10.0"
+types-pyaudio = "^0.2.16.20240425"
+opencv-stubs = "^0.0.8"
+setuptools = "^69.5.1"
+types-setuptools = "^69.5.0.20240423"
+types-pyserial = "^3.5.0.20240311"
+ruff = "^0.4.1"
+pyqt5 = "=5.15.2"
+pyqt5-stubs = "^5.15.6.0"
+opencv-python-headless = "^4.9.0.80"
+pyright = "^1.1.360"
+ruff-lsp = "^0.0.53"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
