@@ -33,6 +33,8 @@ ruff = "^0.4.1"
 pyqt5 = "=5.15.2"
 pyqt5-stubs = "^5.15.6.0"
 opencv-python-headless = "^4.9.0.80"
+pyright = "^1.1.360"
+ruff-lsp = "^0.0.53"
 
 [build-system]
 requires = ["poetry-core"]
